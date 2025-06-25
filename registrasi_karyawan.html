@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <title>Registrasi Karyawan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -17,10 +19,13 @@
     .card {
       background: white;
       border-radius: 12px;
-      max-width: 600px;
-      margin: 80px auto;
+      max-width: 900px;
+      margin: 60px auto;
       padding: 30px 40px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .table-container {
+      overflow-x: auto;
     }
     h2 {
       text-align: center;
@@ -46,6 +51,13 @@
       font-size: 16px;
       cursor: pointer;
     }
+    .edit-row {
+      background-color: #fff3cd !important;
+    }
+    .search-box {
+      margin-top: 20px;
+      margin-bottom: -10px;
+    }
   </style>
 </head>
 <body>
@@ -53,52 +65,41 @@
     <h2>Registrasi Karyawan</h2>
     <label for="nik">NIK</label>
     <input type="text" id="nik">
-
     <label for="nama">Nama</label>
     <input type="text" id="nama">
-
     <label for="company">Company</label>
-    <select id="company"></select>
-
+    <select id="company"><option value="" disabled selected>Pilih Company</option></select>
     <label for="department">Department</label>
-    <select id="department"></select>
-
+    <select id="department"><option value="" disabled selected>Pilih Department</option></select>
     <label for="location">Lokasi</label>
-    <select id="location"></select>
+    <select id="location"><option value="" disabled selected>Pilih Lokasi</option></select>
+    <button id="simpanBtn" onclick="simpan()">Simpan</button>
 
-    <label for="metode">Metode Absen</label>
-    <select id="metode">
-      <option value="device">Device</option>
-      <option value="fingerprint">Fingerprint</option>
-      <option value="nfc">NFC</option>
-    </select>
-
-    <div id="fieldFingerprint" style="display:none">
-      <label for="fid">Fingerprint ID</label>
-      <input type="text" id="fid">
-    </div>
-    <div id="fieldNFC" style="display:none">
-      <label for="nfc">NFC UID</label>
-      <input type="text" id="nfc">
+    <div class="search-box">
+      <input type="text" id="searchInput" class="form-control" placeholder="Cari NIK atau Nama..." oninput="tampilkanData()">
     </div>
 
-    <button onclick="simpan()">Simpan</button>
+    <div id="dataTableContainer" class="table-container mt-3"></div>
+    <div class="mt-3 d-flex justify-content-between">
+      <button class="btn btn-outline-secondary btn-sm" onclick="exportJSON()">Export JSON</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="clearAll()">Clear All</button>
+    </div>
   </div>
 
   <script>
     const companySelect = document.getElementById("company");
     const departmentSelect = document.getElementById("department");
     const locationSelect = document.getElementById("location");
-    const metodeSelect = document.getElementById("metode");
+    const btn = document.getElementById("simpanBtn");
 
-    metodeSelect.addEventListener("change", () => {
-      document.getElementById("fieldFingerprint").style.display = metodeSelect.value === "fingerprint" ? "block" : "none";
-      document.getElementById("fieldNFC").style.display = metodeSelect.value === "nfc" ? "block" : "none";
-    });
+    let editIndex = null;
+    let currentEditRow = null;
+    let relationData = {};
 
     fetch("relasi_company_department_lokasi.json")
       .then(res => res.json())
-      .then(relationData => {
+      .then(data => {
+        relationData = data;
         const companies = Object.keys(relationData);
         companies.forEach(company => {
           const opt = document.createElement("option");
@@ -107,8 +108,8 @@
         });
 
         companySelect.addEventListener("change", () => {
-          departmentSelect.innerHTML = "";
-          locationSelect.innerHTML = "";
+          departmentSelect.innerHTML = '<option value="" disabled selected>Pilih Department</option>';
+          locationSelect.innerHTML = '<option value="" disabled selected>Pilih Lokasi</option>';
           const depts = Object.keys(relationData[companySelect.value] || {});
           depts.forEach(d => {
             const opt = document.createElement("option");
@@ -119,7 +120,7 @@
         });
 
         departmentSelect.addEventListener("change", () => {
-          locationSelect.innerHTML = "";
+          locationSelect.innerHTML = '<option value="" disabled selected>Pilih Lokasi</option>';
           const locations = relationData[companySelect.value]?.[departmentSelect.value] || [];
           locations.forEach(loc => {
             const opt = document.createElement("option");
@@ -127,27 +128,138 @@
             locationSelect.add(opt);
           });
         });
-
-        companySelect.dispatchEvent(new Event("change"));
       });
 
     function simpan() {
-      const data = {
-        nik: document.getElementById("nik").value,
-        nama: document.getElementById("nama").value,
-        company: companySelect.value,
-        department: departmentSelect.value,
-        location: locationSelect.value,
-        metode: metodeSelect.value,
-        fid: document.getElementById("fid").value,
-        nfc: document.getElementById("nfc").value,
-      };
+      const nik = document.getElementById("nik").value.trim();
+      const nama = document.getElementById("nama").value.trim();
+      const company = companySelect.value;
+      const department = departmentSelect.value;
+      const location = locationSelect.value;
 
-      const list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
-      list.push(data);
+      if (!nik || !nama || !company || !department || !location) {
+        alert("Semua field harus diisi.");
+        return;
+      }
+      if (!/^[0-9]{4,}$/.test(nik)) {
+        alert("NIK minimal 4 digit angka.");
+        return;
+      }
+      if (/^[0-9 ]+$/.test(nama)) {
+        alert("Nama tidak boleh angka semua atau kosong.");
+        return;
+      }
+
+      let list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
+
+      if (editIndex !== null) {
+        list[editIndex] = { nik, nama, company, department, location };
+        alert("Data berhasil diupdate.");
+        editIndex = null;
+        btn.innerText = "Simpan";
+      } else {
+        const duplicate = list.some(d => d.nik === nik && d.company === company && d.department === department && d.location === location);
+        if (duplicate) {
+          alert("Data sudah ada.");
+          return;
+        }
+        list.push({ nik, nama, company, department, location });
+        alert("Data berhasil disimpan.");
+      }
+
       localStorage.setItem("data_karyawan", JSON.stringify(list));
-      alert("Berhasil disimpan.");
+      resetForm();
+      tampilkanData();
     }
+
+    function tampilkanData() {
+      const list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const container = document.getElementById("dataTableContainer");
+
+      const filtered = list.filter(d =>
+        d.nik.toLowerCase().includes(keyword) ||
+        d.nama.toLowerCase().includes(keyword)
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = "<p class='mt-3'>Tidak ada data ditemukan.</p>";
+        return;
+      }
+
+      let html = `<table class="table table-bordered table-striped">
+        <thead><tr><th>NIK</th><th>Nama</th><th>Company</th><th>Dept</th><th>Lokasi</th><th>Aksi</th></tr></thead>
+        <tbody>`;
+      filtered.forEach((d, i) => {
+        html += `<tr class="${i === editIndex ? 'edit-row' : ''}">
+          <td>${d.nik}</td><td>${d.nama}</td><td>${d.company}</td>
+          <td>${d.department}</td><td>${d.location}</td>
+          <td>
+            <button class='btn btn-warning btn-sm' onclick='editData(${i})'>Edit</button>
+            <button class='btn btn-danger btn-sm' onclick='hapusData(${i})'>Hapus</button>
+          </td>
+        </tr>`;
+      });
+      html += "</tbody></table>";
+      container.innerHTML = html;
+    }
+
+    function hapusData(index) {
+      if (!confirm("Yakin ingin menghapus data ini?")) return;
+      let list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
+      list.splice(index, 1);
+      localStorage.setItem("data_karyawan", JSON.stringify(list));
+      tampilkanData();
+    }
+
+    function editData(index) {
+      const list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
+      const d = list[index];
+      document.getElementById("nik").value = d.nik;
+      document.getElementById("nama").value = d.nama;
+      companySelect.value = d.company;
+      companySelect.dispatchEvent(new Event("change"));
+      setTimeout(() => {
+        departmentSelect.value = d.department;
+        departmentSelect.dispatchEvent(new Event("change"));
+        setTimeout(() => {
+          locationSelect.value = d.location;
+        }, 150);
+      }, 150);
+      editIndex = index;
+      btn.innerText = "Update";
+      tampilkanData();
+    }
+
+    function resetForm() {
+      document.getElementById("nik").value = "";
+      document.getElementById("nama").value = "";
+      companySelect.selectedIndex = 0;
+      departmentSelect.innerHTML = '<option value="" disabled selected>Pilih Department</option>';
+      locationSelect.innerHTML = '<option value="" disabled selected>Pilih Lokasi</option>';
+      btn.innerText = "Simpan";
+      editIndex = null;
+    }
+
+    function exportJSON() {
+      const data = localStorage.getItem("data_karyawan");
+      if (!data) return alert("Tidak ada data untuk diexport.");
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "data_karyawan.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll() {
+      if (!confirm("Yakin ingin menghapus semua data?")) return;
+      localStorage.removeItem("data_karyawan");
+      tampilkanData();
+    }
+
+    window.onload = tampilkanData;
   </script>
 </body>
 </html>
