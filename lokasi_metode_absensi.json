@@ -1,0 +1,20 @@
+{
+  "Gudang Produksi Anyar": "Fingerprint",
+  "Gudang Produksi Blaru": "Fingerprint",
+  "Gudang Produksi Cikampek": "Fingerprint",
+  "Lab QA Feedmill": "NFC",
+  "QA Center Balaraja": "NFC",
+  "QA Subang": "NFC",
+  "Bengkel Utama Feedmill": "Device",
+  "Unit Mekanik A": "Device",
+  "Unit Mekanik B": "Device",
+  "Hatchery A": "Fingerprint",
+  "Hatchery B": "Fingerprint",
+  "Hatchery C": "Fingerprint",
+  "Workshop Hatchery 1": "Device",
+  "Workshop Hatchery 2": "Device",
+  "Service Center Hatchery": "Device",
+  "QA Hatchery": "NFC",
+  "Monitoring Center": "NFC",
+  "Quality Check Unit": "NFC"
+}

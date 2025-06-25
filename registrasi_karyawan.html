@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrasi Karyawan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('login_background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 30px 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      background-color: #198754;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Registrasi Karyawan</h2>
+    <label for="nik">NIK</label>
+    <input type="text" id="nik">
+
+    <label for="nama">Nama</label>
+    <input type="text" id="nama">
+
+    <label for="company">Company</label>
+    <select id="company"></select>
+
+    <label for="department">Department</label>
+    <select id="department"></select>
+
+    <label for="location">Lokasi</label>
+    <select id="location"></select>
+
+    <label for="metode">Metode Absen</label>
+    <select id="metode">
+      <option value="device">Device</option>
+      <option value="fingerprint">Fingerprint</option>
+      <option value="nfc">NFC</option>
+    </select>
+
+    <div id="fieldFingerprint" style="display:none">
+      <label for="fid">Fingerprint ID</label>
+      <input type="text" id="fid">
+    </div>
+    <div id="fieldNFC" style="display:none">
+      <label for="nfc">NFC UID</label>
+      <input type="text" id="nfc">
+    </div>
+
+    <button onclick="simpan()">Simpan</button>
+  </div>
+
+  <script>
+    const companySelect = document.getElementById("company");
+    const departmentSelect = document.getElementById("department");
+    const locationSelect = document.getElementById("location");
+    const metodeSelect = document.getElementById("metode");
+
+    metodeSelect.addEventListener("change", () => {
+      document.getElementById("fieldFingerprint").style.display = metodeSelect.value === "fingerprint" ? "block" : "none";
+      document.getElementById("fieldNFC").style.display = metodeSelect.value === "nfc" ? "block" : "none";
+    });
+
+    fetch("relasi_company_department_lokasi.json")
+      .then(res => res.json())
+      .then(relationData => {
+        const companies = Object.keys(relationData);
+        companies.forEach(company => {
+          const opt = document.createElement("option");
+          opt.value = opt.text = company;
+          companySelect.add(opt);
+        });
+
+        companySelect.addEventListener("change", () => {
+          departmentSelect.innerHTML = "";
+          locationSelect.innerHTML = "";
+          const depts = Object.keys(relationData[companySelect.value] || {});
+          depts.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = opt.text = d;
+            departmentSelect.add(opt);
+          });
+          departmentSelect.dispatchEvent(new Event("change"));
+        });
+
+        departmentSelect.addEventListener("change", () => {
+          locationSelect.innerHTML = "";
+          const locations = relationData[companySelect.value]?.[departmentSelect.value] || [];
+          locations.forEach(loc => {
+            const opt = document.createElement("option");
+            opt.value = opt.text = loc;
+            locationSelect.add(opt);
+          });
+        });
+
+        companySelect.dispatchEvent(new Event("change"));
+      });
+
+    function simpan() {
+      const data = {
+        nik: document.getElementById("nik").value,
+        nama: document.getElementById("nama").value,
+        company: companySelect.value,
+        department: departmentSelect.value,
+        location: locationSelect.value,
+        metode: metodeSelect.value,
+        fid: document.getElementById("fid").value,
+        nfc: document.getElementById("nfc").value,
+      };
+
+      const list = JSON.parse(localStorage.getItem("data_karyawan") || "[]");
+      list.push(data);
+      localStorage.setItem("data_karyawan", JSON.stringify(list));
+      alert("Berhasil disimpan.");
+    }
+  </script>
+</body>
+</html>

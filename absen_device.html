@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Absen by Device</title>
+  <style>
+    body {
+      background-image: url('login_background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 30px 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    img.logo {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #198754;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .info {
+      text-align: left;
+      margin-top: 20px;
+      line-height: 2;
+    }
+    .info td {
+      padding-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <img src="ireapnet_logo.jpg" alt="iReapNet Logo" class="logo">
+    <h2>Absen by Device</h2>
+    <button id="absenButton" onclick="handleAbsen()">Check In</button>
+
+    <div class="info" id="absenInfo" style="display: none;">
+      <table>
+        <tr><td><strong>Nama</strong></td><td>:</td><td id="nama">Fakhri Dhiya</td></tr>
+        <tr><td><strong>NIK</strong></td><td>:</td><td id="nik">123456789</td></tr>
+        <tr><td><strong>Waktu</strong></td><td>:</td><td id="waktu">--</td></tr>
+        <tr><td><strong>Lokasi</strong></td><td>:</td><td id="lokasi">--</td></tr>
+        <tr><td><strong>DeviceID</strong></td><td>:</td><td id="deviceId">--</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const button = document.getElementById("absenButton");
+    const infoBox = document.getElementById("absenInfo");
+    const cooldown = 5 * 60 * 1000;
+    let state = localStorage.getItem("absenState") || "ready_checkin";
+    let lastTime = parseInt(localStorage.getItem("lastAbsenTime")) || 0;
+
+    updateState();
+    setInterval(updateState, 1000);
+
+    function handleAbsen() {
+      if (!navigator.geolocation) {
+        alert("Perangkat Anda tidak mendukung geolokasi.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+
+          if (accuracy > 500) {
+            alert("Lokasi tidak akurat (±" + Math.round(accuracy) + " meter). Silakan aktifkan GPS atau gunakan perangkat lain.");
+            return;
+          }
+
+          const now = new Date();
+          const waktu = now.toLocaleString("id-ID", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+          }).replace(/\./g, ':');
+
+          const nama = "Fakhri Dhiya";
+          const nik = "123456789";
+          const lokasi = `${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`;
+          const deviceId = localStorage.getItem("device_id") || generateDeviceID();
+
+          document.getElementById("waktu").innerText = waktu;
+          document.getElementById("lokasi").innerText = lokasi;
+          document.getElementById("deviceId").innerText = deviceId;
+
+          localStorage.setItem("device_id", deviceId);
+
+          infoBox.style.display = "block";
+          lastTime = Date.now();
+          localStorage.setItem("lastAbsenTime", lastTime);
+
+          const data = {
+            waktu,
+            nama,
+            nik,
+            lokasi,
+            device_id: deviceId,
+            status: state.includes("checkin") ? "in" : "out"
+          };
+
+          const logs = JSON.parse(localStorage.getItem("absen_log") || "[]");
+          logs.push(data);
+          localStorage.setItem("absen_log", JSON.stringify(logs));
+
+          if (state === "ready_checkin") {
+            state = "disabled_checkin";
+            button.innerText = "Check In";
+          } else if (state === "ready_checkout") {
+            state = "disabled_checkout";
+            button.innerText = "Check Out";
+          }
+
+          button.disabled = true;
+          localStorage.setItem("absenState", state);
+
+          setTimeout(() => location.reload(), 30000);
+        },
+        (err) => {
+          alert("Gagal mendapatkan lokasi: " + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function updateState() {
+      const now = Date.now();
+      const elapsed = now - lastTime;
+
+      if (state === "disabled_checkin" && elapsed >= cooldown) {
+        state = "ready_checkout";
+        button.innerText = "Check Out";
+        button.disabled = false;
+      } else if (state === "disabled_checkout" && elapsed >= cooldown) {
+        state = "ready_checkin";
+        button.innerText = "Check In";
+        button.disabled = false;
+      } else if (state.includes("disabled")) {
+        button.disabled = true;
+      }
+
+      localStorage.setItem("absenState", state);
+    }
+
+    function generateDeviceID() {
+      return "web-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+  </script>
+</body>
+</html>

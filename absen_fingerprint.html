@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Absen Fingerprint</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('login_background.png');
+      background-size: cover;
+      background-position: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 420px;
+      margin: 100px auto;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    }
+    img.logo {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #198754;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .info {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .info-row {
+      display: grid;
+      grid-template-columns: 90px 10px 1fr;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="ireapnet_logo.jpg" class="logo" />
+    <h2>Absen dengan Fingerprint</h2>
+    <button class="btn" onclick="doAbsen()">Scan Finger</button>
+    <div class="info" id="hasilAbsen" style="display:none;">
+      <div class="info-row"><span>Nama</span><span>:</span><span>Fakhri Dhiya</span></div>
+      <div class="info-row"><span>NIK</span><span>:</span><span>123456789</span></div>
+      <div class="info-row"><span>Waktu</span><span>:</span><span id="waktu">--</span></div>
+    </div>
+  </div>
+  <script>
+    function doAbsen() {
+      const now = new Date();
+      const waktuStr = now.toLocaleDateString('id-ID') + ', ' + now.toLocaleTimeString('id-ID', { hour12: false });
+      document.getElementById("waktu").textContent = waktuStr;
+      document.getElementById("hasilAbsen").style.display = "block";
+      setTimeout(() => location.reload(), 30000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+{
+  "Feedmill": {
+    "Produksi": [
+      "Gudang Produksi Anyar",
+      "Gudang Produksi Blaru",
+      "Gudang Produksi Cikampek"
+    ],
+    "QA": [
+      "Lab QA Feedmill",
+      "QA Center Balaraja",
+      "QA Subang"
+    ],
+    "Maintenance": [
+      "Bengkel Utama Feedmill",
+      "Unit Mekanik A",
+      "Unit Mekanik B"
+    ]
+  },
+  "Breeding Hatchery": {
+    "Produksi": [
+      "Hatchery A",
+      "Hatchery B",
+      "Hatchery C"
+    ],
+    "Maintenance": [
+      "Workshop Hatchery 1",
+      "Workshop Hatchery 2",
+      "Service Center Hatchery"
+    ],
+    "QA": [
+      "QA Hatchery",
+      "Monitoring Center",
+      "Quality Check Unit"
+    ]
+  },
+  "Trading": {
+    "Sales": [
+      "Kantor Pusat Sales",
+      "Cabang Bekasi",
+      "Cabang Surabaya"
+    ],
+    "Logistik": [
+      "Gudang Utama Trading",
+      "Gudang Transit",
+      "Logistik Sentral"
+    ],
+    "Marketing": [
+      "Marketing HQ",
+      "Kampanye Produk A",
+      "Kampanye Produk B"
+    ]
+  },
+  "Farm Kemitraan": {
+    "Operasional": [
+      "Site Tegal",
+      "Site Purwokerto",
+      "Site Pekalongan"
+    ],
+    "Kesehatan Hewan": [
+      "Klinik Unggas A",
+      "Vet Center B",
+      "Postmortem Unit"
+    ],
+    "Produksi": [
+      "Kandang Kemitraan A",
+      "Kandang B",
+      "Kandang C"
+    ]
+  },
+  "Farm Komersial": {
+    "Produksi": [
+      "Kandang Komersial A",
+      "Komersial B",
+      "Komersial C"
+    ],
+    "Pakan": [
+      "Pakan Site A",
+      "Pakan Site B",
+      "Pakan Site C"
+    ],
+    "Panen": [
+      "Tempat Panen A",
+      "Panen Area 1",
+      "Panen Area 2"
+    ]
+  },
+  "RPBCS": {
+    "Penelitian": [
+      "Lab Riset RPBCS 1",
+      "Lab RPBCS 2",
+      "Analisis RPBCS"
+    ],
+    "Teknologi": [
+      "Unit Teknologi A",
+      "Tek Center B",
+      "Digital Lab RPBCS"
+    ],
+    "Logistik": [
+      "Gudang RPB A",
+      "Gudang RPB B",
+      "Transit RPBCS"
+    ]
+  },
+  "FA Maintenance": {
+    "Teknik": [
+      "FA Workshop A",
+      "Teknik Utama",
+      "Unit Mekanikal"
+    ],
+    "Listrik": [
+      "Instalasi A",
+      "Panel Room",
+      "Power Backup"
+    ],
+    "Utility": [
+      "Supply Air",
+      "Pompa Unit",
+      "Backup Utility"
+    ]
+  },
+  "WBI": {
+    "Produksi": [
+      "Pabrik WBI A",
+      "Pabrik WBI B",
+      "Pabrik WBI C"
+    ],
+    "Logistik": [
+      "Gudang Utama WBI",
+      "Gudang Samping WBI",
+      "Transit Point WBI"
+    ],
+    "QC": [
+      "QA WBI",
+      "QC Lab A",
+      "QC Lab B"
+    ]
+  },
+  "MUASS": {
+    "R&D": [
+      "Lab Riset A",
+      "Lab Riset B",
+      "R&D Workshop"
+    ],
+    "Teknologi": [
+      "Unit Tech 1",
+      "Unit Tech 2",
+      "Workshop Teknologi"
+    ],
+    "HR": [
+      "HR Center MUASS",
+      "Rekrutmen Center",
+      "Training Hall"
+    ]
+  },
+  "FFI": {
+    "Produksi": [
+      "Plant A",
+      "Plant B",
+      "Plant C"
+    ],
+    "Marketing": [
+      "Marketing HQ",
+      "Cabang Jakarta",
+      "Cabang Bandung"
+    ],
+    "Support": [
+      "Support Center A",
+      "Support Center B",
+      "Helpdesk FFI"
+    ]
+  },
+  "Company Lain": {
+    "General": [
+      "Kantor Pusat",
+      "Cabang A",
+      "Cabang B"
+    ],
+    "Support": [
+      "Support IT",
+      "Support HR",
+      "Support Finance"
+    ],
+    "Operasional": [
+      "Operasional A",
+      "Operasional B",
+      "Operasional C"
+    ]
+  }
+}
